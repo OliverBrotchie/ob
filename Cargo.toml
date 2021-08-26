@@ -1,0 +1,22 @@
+[package]
+name = "ob"
+version = "0.1.0"
+edition = "2018"
+description = "A Blog and RSS system written in Rust."
+license = "GPL-3"
+repository = "https://github.com/OliverBrotchie/conveyance-cli"
+keywords = ["rss", "blog"]
+categories = ["command-line-utilities","text-processing"]
+authors = ["Oliver Brotchie <o.brotchie@gmail.com>"]
+
+[dependencies]
+structopt = "0.3.22"
+quick-xml = "0.22.0"
+serde_json = "1.0.64"
+serde = { version = "1.0.127", features = ["derive"] }
+chrono = "0.4.19"
+markdown = "0.3.0"
+
+[profile.release]
+lto = true
+panic = "abort"

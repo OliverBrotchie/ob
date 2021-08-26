@@ -1,2 +1,2 @@
 # OB - Oliver's Blog Script
-A Blog &amp; RSS system written in Rust
+A Blog and RSS system written in Rust.
