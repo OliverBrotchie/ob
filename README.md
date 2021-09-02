@@ -6,13 +6,13 @@
 
 ## Features
 
-- Converts blog entries written in Markdown into HTML  ✍🏻
+- Converts blog entries written in Markdown into HTML &nbsp;✍🏻
 - Keeps a rolling blog page  🔎
-- Creates entries in the rolling blog page that are easily modifiable with CSS  🚀
+- Creates entries in the rolling blog page that are easily modifiable with CSS &nbsp; 🚀
 - Updates an rss feed which includes blog posts in full  📰
-- One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously  🌏
-- Works on MacOS, Linux and Windows  🖥
-- Blazingly Fast  🔥
+- One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously &nbsp; 🌏
+- Works on MacOS, Linux and Windows &nbsp; 🖥
+- Blazingly Fast &nbsp; 🔥
 
 ## Installation
 
