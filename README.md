@@ -130,5 +130,4 @@ ob --new
 The first time `ob` is used it will create a folder at: `/blog`.
 
 When you create a new draft it will be located at: `/blog/drafts`.  
-When you publish a new draft it will be located at: `/blog/example.html`.  
-You can delete any blog post with `-d`.  
+When you publish a new draft it will be located at: `/blog/example.html`.
