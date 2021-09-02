@@ -254,7 +254,7 @@ fn insert_xml(
     );
 
     if let Some(img) = &entry.img {
-        s = format!("<img src='{}'/><label>{}</label>", img, s);
+        s = format!("<img src='{}'/><label>{}</label>", xml_escape(img), s);
     }
     match flag {
         "rss" => {
