@@ -123,7 +123,7 @@ FLAGS:
     -V, --version    Prints version information
 ```
 
-Example:
+**Example:**
 
 ```shell
 ob --new
