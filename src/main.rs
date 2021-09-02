@@ -1,23 +1,22 @@
 use chrono::prelude::*;
-use chrono::{NaiveDate, NaiveDateTime};
-use quick_xml::events::{BytesEnd, BytesStart, BytesText, Event};
-use quick_xml::Reader;
-use quick_xml::Writer;
+use markdown;
+use quick_xml::{events::Event, Reader, Writer};
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
-use std::env;
-use std::fs;
-use std::io;
-use std::io::prelude::*;
-use std::io::Cursor;
-use std::path::PathBuf;
-use std::str;
+use std::{
+    env, fs,
+    io::{self, Cursor},
+    path::PathBuf,
+    str,
+};
 use structopt::StructOpt;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 struct Entry {
     name: String,
+    kebab: String,
     date: String,
+    author: String,
+    img: Option<String>,
     published: bool,
 }
 
@@ -32,7 +31,8 @@ struct Config {
     blog: PathBuf,
     rss: PathBuf,
     template: PathBuf,
-    website: String,
+    blog_address: String,
+    images: bool,
 }
 
 /// Arguments
@@ -55,23 +55,22 @@ struct Args {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    if check_setup().is_ok() {
-        let blog_file: BlogFile = serde_json::from_str(&fs::read_to_string("/blog/blog.json")?)?;
-        let config: Config = serde_json::from_str(&fs::read_to_string(&blog_file.config)?)?;
-        let args = Args::from_args();
+    setup()?;
+    let blog_file: BlogFile = serde_json::from_str(&fs::read_to_string("blog/.config.json")?)?;
+    let config: Config = serde_json::from_str(&fs::read_to_string(&blog_file.config)?)?;
+    let args = Args::from_args();
 
-        if args.new {
-            new_draft(blog_file)?
-        } else if args.publish {
-            publish_draft(blog_file, config)?
-        } else {
-            delete(blog_file, config)?
-        }
+    if args.new {
+        new_draft(blog_file)?
+    } else if args.publish {
+        publish_draft(blog_file, config)?
+    } else {
+        delete(blog_file, config)?
     }
     Ok(())
 }
 
-fn check_setup() -> Result<(), io::Error> {
+fn setup() -> Result<(), io::Error> {
     let cur_path_buf = env::current_dir()?;
     let cur_dir = cur_path_buf.as_path();
 
@@ -80,157 +79,272 @@ fn check_setup() -> Result<(), io::Error> {
         let x = x.expect("Error");
         x.file_type().unwrap().is_dir() && x.file_name().to_str().unwrap() == "blog"
     }) {
-        match setup() {
-            Ok(()) => {}
-            Err(e) => {
-                println!("Something went wrong when with setup. Error: {}", e)
+        let mut config_path: PathBuf;
+        println!("Blog Setup");
+        loop {
+            println!("Please input the path to your config file:");
+            match read_input() {
+                Ok(input) => {
+                    config_path = PathBuf::from(input);
+                    clear();
+                    match fs::read_to_string(&config_path) {
+                        Ok(s) => match serde_json::from_str::<Config>(&s) {
+                            Ok(_) => break,
+                            _ => println!("Config file was not valid."),
+                        },
+                        _ => println!("Path to config file was not valid."),
+                    }
+                }
+                _ => println!("Error whilst reading input."),
             }
         }
+
+        let f = BlogFile {
+            config: config_path,
+            entries: Vec::new(),
+        };
+
+        fs::create_dir_all("blog/drafts/")?;
+        fs::write("blog/.config.json", serde_json::to_string(&f)?)?;
+        clear();
     }
     Ok(())
 }
 
-fn setup() -> Result<(), io::Error> {
-    let mut config_path: PathBuf;
+fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
+    println!("Please enter the title of the blog post:");
+    let name = read_input()?;
+    let k = kebab(&name);
+
+    println!("Please enter the name of the author:");
+    let author = read_input()?;
+
+    // Create draft
+    fs::File::create(format!("blog/drafts/{}.md", name))?;
+    blog_file.entries.push(Entry {
+        name,
+        kebab: k,
+        author,
+        published: false,
+        date: String::new(),
+        img: None,
+    });
+    fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
+    Ok(())
+}
+
+fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::error::Error>> {
+    println!("Please enter the number of the blog post you wish to delete:");
+    let choice = blog_file
+        .entries
+        .remove(display_choices(&blog_file.entries)?);
+
+    if choice.published {
+        fs::remove_file(format!("blog/{}.html", choice.kebab))?;
+
+        // Remove XML and HTML entries
+        remove_xml(config.rss, &choice)?;
+        remove_xml(config.blog, &choice)?;
+    } else {
+        fs::remove_file(format!("blog/drafts/{}.md", &choice.name))?;
+    }
+
+    fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
+    Ok(())
+}
+
+fn remove_xml(file: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Error>> {
+    let path = fs::read_to_string(&file)?;
+    let mut r = Reader::from_str(&path);
+    let mut w = Writer::new(Cursor::new(Vec::new()));
+    let mut buf = Vec::<u8>::new();
+    let mut found = false;
+
+    // Loop over the xml tags
     loop {
-        println!("Please input the path to your config file:\n\t");
-        match read_input() {
-            Ok(input) => {
-                config_path = PathBuf::from(input);
-                match fs::read_to_string(&config_path) {
-                    Ok(s) => match serde_json::from_str::<Config>(&s) {
-                        Ok(_) => break,
-                        _ => println!("Config file was not valid."),
-                    },
-                    _ => println!("Path to config file was not valid."),
+        match r.read_event(&mut buf) {
+            Ok(Event::Start(ref e))
+                if (e.name() == b"item" || e.name() == b"li")
+                    && e.attributes().any(|a| {
+                        a.unwrap().value.into_owned() == entry.kebab.clone().into_bytes()
+                    }) =>
+            {
+                found = true
+            }
+            Ok(Event::End(ref e)) if e.name() == b"item" || e.name() == b"li" => found = false,
+            Ok(Event::Eof) => break,
+            Ok(e) if !found => w.write_event(e)?,
+            Ok(_) => (),
+            Err(e) => panic!("Error at position {}: {:?}", r.buffer_position(), e),
+        }
+        buf.clear();
+    }
+    fs::write(file, w.into_inner().into_inner())?;
+    Ok(())
+}
+
+fn publish_draft(
+    mut blog_file: BlogFile,
+    config: Config,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if blog_file.entries.len() == 0 {
+        println!("No blog entries exist.")
+    } else {
+        // Read in choice
+        println!("Please enter the number of the draft you wish to publish:");
+        let (list, mut choices): (Vec<Entry>, Vec<Entry>) =
+            blog_file.entries.into_iter().partition(|e| e.published);
+        let i = display_choices(&choices)?;
+
+        // Convert markdown file to html
+        let html = markdown::to_html(&fs::read_to_string(format!(
+            "blog/drafts/{}.md",
+            choices[i].name
+        ))?);
+
+        // Ask for images
+        if config.images {
+            println!("Please enter a url to a cover image:");
+            choices[i].img = Some(read_input()?);
+        }
+        choices[i].date = Utc::now().to_rfc2822();
+
+        // Edit blog index and rss feed
+        insert_xml(&config.rss, &config, &choices[i], &html, "rss")?;
+        insert_xml(&config.blog, &config, &choices[i], &html, "blog")?;
+        insert_xml(&config.template, &config, &choices[i], &html, "template")?;
+
+        choices[i].published = true;
+        choices.extend(list);
+        blog_file.entries = choices.clone();
+        fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
+        fs::remove_file(format!("blog/drafts/{}.md", kebab(&choices[i].name)))?;
+    }
+    Ok(())
+}
+
+fn insert_xml(
+    file: &PathBuf,
+    config: &Config,
+    entry: &Entry,
+    html: &str,
+    flag: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let path = fs::read_to_string(&file)?;
+    let mut r = Reader::from_str(&path);
+    let mut w = Writer::new(Cursor::new(Vec::new()));
+    let mut buf = Vec::<u8>::new();
+    // Create template string
+    let mut s = format!(
+        "<{size}>{name}</{size}><span>by {author}</span><time datetime='{rfc}'>{date}</time>",
+        name = &entry.name,
+        author = entry.author,
+        rfc = &entry.date,
+        size = if flag == "blog" { "h3" } else { "h1" },
+        date = entry
+            .date
+            .split(" ")
+            .take(4)
+            .fold(String::new(), |acc, e| acc + " " + e)[1..]
+            .to_string()
+    );
+
+    if let Some(img) = &entry.img {
+        s = format!("<img src='{}'/><label>{}</label>", img, s);
+    }
+    match flag {
+        "rss" => {
+            s = format!(
+                "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[\n{s}\n{html}\n]]>\n</description>\n</item>",
+                name = entry.name,
+                kebab = entry.kebab,
+                address = config.blog_address,
+                rfc = &entry.date,
+                s = s,
+                html = html,
+            )
+        }
+        "blog" => {
+            s = format!(
+                "<li id='{name}'><a href='{address}{kebab}'>{s}</a></li>",
+                name = entry.name,
+                kebab = entry.kebab,
+                address = config.blog_address,
+                s = s,
+            )
+        }
+        "template" => s = s + "\n" + html,
+        _ => (),
+    }
+
+    // Loop over every tag
+    loop {
+        match r.read_event(&mut buf) {
+            Ok(Event::Start(e)) if flag == "template" && e.name() == b"title" => {
+                w.write(format!("<title>{}</title>", entry.name).as_bytes())?
+            }
+            Ok(Event::Comment(e)) => {
+                if &*e.unescaped()? == b" OB " {
+                    w.write(b"<!-- OB -->\n")?;
+                    w.write(s.as_bytes())?;
+                } else {
+                    w.write_event(Event::Comment(e))?;
                 }
             }
-            _ => println!("Error whilst reading input."),
+            Ok(Event::Eof) => break,
+            Ok(e) => w.write_event(e)?,
+            Err(e) => panic!(
+                "Error when reading {} {}: {:?}",
+                flag,
+                r.buffer_position(),
+                e
+            ),
         }
+        buf.clear();
     }
-    let f = BlogFile {
-        config: config_path,
-        entries: Vec::new(),
-    };
-    fs::create_dir_all("/blog/drafts")?;
-    fs::write("/blog/blog.json", serde_json::to_string(&f)?)?;
+
+    fs::write(
+        if flag == "template" {
+            PathBuf::from(format!("blog/{}.html", entry.kebab))
+        } else {
+            file.clone()
+        },
+        w.into_inner().into_inner(),
+    )?;
     Ok(())
 }
 
 fn read_input() -> Result<String, io::Error> {
     let mut buf = String::new();
     io::stdin().read_line(&mut buf)?;
-    Ok(buf)
+    Ok(buf.replace("\n", ""))
 }
 
-fn display_choices(blog_file: &Vec<Entry>) -> Result<usize, Box<dyn std::error::Error>> {
-    for i in 0..blog_file.len() {
-        println!("{}. {}", i, blog_file[i].name);
+fn display_choices(blog_file: &[Entry]) -> Result<usize, Box<dyn std::error::Error>> {
+    let input: usize;
+    for (i, e) in blog_file.iter().enumerate() {
+        println!("{}. {}", i + 1, e.name);
     }
-    println!("\n\t");
-    Ok(read_input()?.parse::<usize>()?)
-}
-
-fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
-    println!("Please enter the title of the blog post:\n\t");
-    let name = read_input()?;
-
-    // Create draft
-    fs::File::create(format!("/blog/drafts/{}.md", name))?;
-    blog_file.entries.push(Entry {
-        name,
-        published: false,
-        date: String::new(),
-    });
-    fs::write("/blog/blog.json", serde_json::to_string(&blog_file)?)?;
-    Ok(())
-}
-
-fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Please enter the number of the entry you wish to delete:");
-    let choice = blog_file
-        .entries
-        .remove(display_choices(&blog_file.entries)?);
-
-    if choice.published {
-        fs::remove_file(format!("/blog/{}.html", &choice.name))?;
-    } else {
-        fs::remove_file(format!("/blog/drafts/{}.md", &choice.name))?;
-    }
-
-    Ok(())
-}
-
-fn publish_draft(blog_file: BlogFile, config: Config) -> Result<(), io::Error> {
-    Ok(())
-}
-
-/// Interpolate json data into word file.
-fn interpolate_json(
-    buf: Vec<u8>,
-    json: &Map<String, Value>,
-) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    let mut reader = Reader::from_str(str::from_utf8(&buf)?);
-    let mut writer = Writer::new(Cursor::new(Vec::new()));
-    let mut xml_buf = Vec::new();
-    let mut found = false;
-    // Loop over every tag in the XML document
     loop {
-        if !found {
-            // Continue to iterate until the start of a variable
-            match reader.read_event(&mut xml_buf) {
-                Ok(Event::Empty(ref e))
-                    if e.name() == b"w:fldChar"
-                        && e.attributes()
-                            .any(|a| a.unwrap().value.into_owned() == b"begin") =>
-                {
-                    found = true
+        match read_input()?.parse::<usize>() {
+            Ok(n) => {
+                if n - 1 < blog_file.len() {
+                    input = n - 1;
+                    break;
+                } else {
+                    println!("Input was not an option.")
                 }
-                Ok(Event::Eof) => break,
-                Ok(e) => writer.write_event(e)?,
-                Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
             }
-        } else {
-            // When the start of a new variable is found,
-            // skip through and replace it with the desired json value.
-            match reader.read_event(&mut xml_buf) {
-                Ok(Event::Start(ref e)) if e.name() == b"w:t" => {
-                    let mut text_buf = Vec::new();
-                    reader.read_text(e.name(), &mut text_buf)?;
-                    let text = String::from_utf8(text_buf)?
-                        .replace("«", "")
-                        .replace("»", "")
-                        .replace("/w:t", "");
-                    // Test each json value
-                    json.iter().for_each(|(key, value)| {
-                        if text == key.trim() {
-                            // Write in a text tag
-                            writer
-                                .write_event(Event::Start(BytesStart::borrowed(e, e.name().len())))
-                                .expect("Error whilst writing value");
-                            writer
-                                .write_event(Event::Text(BytesText::from_plain_str(
-                                    value.as_str().unwrap(),
-                                )))
-                                .expect("Error: Incorrect Json, key was not a String");
-                            writer
-                                .write_event(Event::End(BytesEnd::borrowed(b"w:t")))
-                                .expect("Error: Could not close tag");
-                        }
-                    })
-                }
-                Ok(Event::Empty(ref e))
-                    if e.name() == b"w:fldChar"
-                        && e.attributes()
-                            .any(|a| a.unwrap().value.into_owned() == b"end") =>
-                {
-                    found = false
-                }
-                Ok(_) => (),
-                Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-            }
+            _ => println!("Input was not a number.",),
         }
-        xml_buf.clear();
     }
-    Ok(writer.into_inner().into_inner())
+    Ok(input)
+}
+
+fn kebab(s: &str) -> String {
+    s.to_lowercase().replace(' ', "-")
+}
+
+fn clear() {
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 }
