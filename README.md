@@ -12,16 +12,19 @@
 - Updates an rss feed which includes blog posts in full.   📰
 - One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously.   💰
 - Works on MacOS, Linux and Windows.   🖥
+- Less than 350 lines of code.   🏖
 - Blazingly Fast.   🔥
 
 ## Installation
 
 Install Rust:
+
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
 Install `ob`:
+
 ```shell
 cargo install ob
 ```
