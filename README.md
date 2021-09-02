@@ -35,17 +35,16 @@ A Rolling Blog File where the blog entries will be listed.
 ```html
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>Your Blog</title>
-		<meta charset="utf-8"/>
-	</head>
-	<body>
-        <h1>Blog Updates</h1>
-        <ul>
-            <!-- OB -->
-
-        </ul>
-	</body>
+  <head>
+    <title>Your Blog</title>
+    <meta charset="utf-8"/>
+  </head>
+  <body>
+    <h1>Blog Updates</h1>
+    <ul>
+      <!-- OB -->
+    </ul>
+  </body>
 </html>
 ```
 
@@ -54,13 +53,13 @@ A Template to be filled out with the content of a blog post.
 ```html
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title></title>
-		<meta charset="utf-8"/>
-	</head>
-	<body>
-        <!-- OB -->
-	</body>
+  <head>
+    <title></title>
+	<meta charset="utf-8"/>
+  </head>
+  <body>
+    <!-- OB -->
+  </body>
 </html>
 ```
 
@@ -69,18 +68,16 @@ An RSS feed.
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/css" href="rss.css" ?>
-<rss version="2.0"
-    xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blog Title</title>
+    <description>Description</description>
+    <language>en-us</language>
+    <link>https://your_blog.com/rss.xml</link>
+    <atom:link href="https://your_blog.com/rss.xml" rel="self" type="application/rss+xml" />
 
-    <channel>
-        <title>Blog Title</title>
-        <description>Description</description>
-        <language>en-us</language>
-        <link>https://your_blog.com/rss.xml</link>
-        <atom:link href="https://your_blog.com/rss.xml" rel="self" type="application/rss+xml" />
-
-        <!-- OB -->
-    </channel>
+    <!-- OB -->
+  </channel>
 </rss>
 ```
 
