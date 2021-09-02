@@ -13,7 +13,7 @@
 - One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously.   💰
 - Works on MacOS, Linux and Windows.   🖥
 - Less than 350 lines of code.   🏖
-- Blazingly Fast.   🔥
+- Blazingly fast.   🔥
 
 ## Installation
 
