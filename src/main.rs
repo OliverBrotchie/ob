@@ -167,7 +167,7 @@ fn remove_xml(file: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Er
             Ok(Event::Start(ref e))
                 if (e.name() == b"item" || e.name() == b"li")
                     && e.attributes().any(|a| {
-                        a.unwrap().value.into_owned() == entry.kebab.clone().into_bytes()
+                        a.unwrap().value.into_owned() == xml_escape(&entry.kebab).into_bytes()
                     }) =>
             {
                 found = true
@@ -237,11 +237,12 @@ fn insert_xml(
     let mut r = Reader::from_str(&path);
     let mut w = Writer::new(Cursor::new(Vec::new()));
     let mut buf = Vec::<u8>::new();
+
     // Create template string
     let mut s = format!(
         "<{size}>{name}</{size}><span>by {author}</span><time datetime='{rfc}'>{date}</time>",
         name = &entry.name,
-        author = entry.author,
+        author = &entry.author,
         rfc = &entry.date,
         size = if flag == "blog" { "h3" } else { "h1" },
         date = entry
@@ -259,18 +260,18 @@ fn insert_xml(
         "rss" => {
             s = format!(
                 "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[\n{s}\n{html}\n]]>\n</description>\n</item>",
-                name = entry.name,
-                kebab = entry.kebab,
+                name = xml_escape(&entry.name),
+                kebab = xml_escape(&entry.kebab),
                 address = config.blog_address,
                 rfc = &entry.date,
-                s = xml_escape(&s),
-                html = xml_escape(html),
+                s = &s,
+                html = html,
             )
         }
         "blog" => {
             s = format!(
                 "<li id='{name}'><a href='{address}{kebab}'>{s}</a></li>",
-                name = entry.name,
+                name = xml_escape(&entry.name),
                 kebab = entry.kebab,
                 address = config.blog_address,
                 s = s,
