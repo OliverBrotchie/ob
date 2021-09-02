@@ -1,7 +1,0 @@
-{
-    "blog": "index.html",
-    "rss": "rss.xml",
-    "template": "template.html",
-    "blog_address": "https://colab-development.github.io/blog/",
-    "images": true
-}

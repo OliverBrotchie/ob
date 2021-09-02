@@ -1,6 +1,6 @@
 [package]
 name = "ob"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2018"
 description = "A Blog and RSS system written in Rust."
 license = "GPL-3"

@@ -29,8 +29,9 @@ struct BlogFile {
 #[derive(Serialize, Deserialize)]
 struct Config {
     blog: PathBuf,
-    rss: PathBuf,
     template: PathBuf,
+    rss: PathBuf,
+    items: usize,
     blog_address: String,
     images: bool,
 }
@@ -38,7 +39,7 @@ struct Config {
 /// Arguments
 #[derive(StructOpt, Debug)]
 #[structopt(
-    name = "OB - Oliver's Blog System",
+    name = "OB",
     about = "A Blog and RSS system written in Rust.",
     author = "Oliver Brotchie, o.brotchie@gmail.com"
 )]
@@ -277,12 +278,34 @@ fn insert_xml(
         _ => (),
     }
 
+    // Rss count variables
+    let mut found = false;
+    let mut count = 1;
+
     // Loop over every tag
     loop {
         match r.read_event(&mut buf) {
+            // Remove excess items on the rss feed
+            Ok(Event::Start(e)) if flag == "rss" && e.name() == b"item" => {
+                count = count + 1;
+                found = true;
+                if count <= config.items {
+                    w.write_event(Event::Start(e))?;
+                }
+            }
+            Ok(Event::End(e)) if flag == "rss" && e.name() == b"item" => {
+                found = false;
+                if count <= config.items {
+                    w.write_event(Event::End(e))?;
+                }
+            }
+
+            // Add titles to the template
             Ok(Event::Start(e)) if flag == "template" && e.name() == b"title" => {
                 w.write(format!("<title>{}</title>", entry.name).as_bytes())?
             }
+
+            // Generic insert
             Ok(Event::Comment(e)) => {
                 if &*e.unescaped()? == b" OB " {
                     w.write(b"<!-- OB -->\n")?;
@@ -292,6 +315,7 @@ fn insert_xml(
                 }
             }
             Ok(Event::Eof) => break,
+            Ok(_) if found && count > config.items => (),
             Ok(e) => w.write_event(e)?,
             Err(e) => panic!(
                 "Error when reading {} {}: {:?}",
