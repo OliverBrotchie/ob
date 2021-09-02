@@ -210,10 +210,12 @@ fn publish_draft(
         }
         choices[i].date = Utc::now().to_rfc2822();
 
-        // Edit blog index and rss feed
+        // Create blog entry
+        insert_xml(&config.template, &config, &choices[i], &html, "template")?;
+
+        // Edit rolling blog and rss feed
         insert_xml(&config.rss, &config, &choices[i], &html, "rss")?;
         insert_xml(&config.blog, &config, &choices[i], &html, "blog")?;
-        insert_xml(&config.template, &config, &choices[i], &html, "template")?;
 
         choices[i].published = true;
         choices.extend(list);
@@ -261,8 +263,8 @@ fn insert_xml(
                 kebab = entry.kebab,
                 address = config.blog_address,
                 rfc = &entry.date,
-                s = s,
-                html = html,
+                s = xml_escape(&s),
+                html = xml_escape(html),
             )
         }
         "blog" => {
@@ -367,6 +369,14 @@ fn display_choices(blog_file: &[Entry]) -> Result<usize, Box<dyn std::error::Err
 
 fn kebab(s: &str) -> String {
     s.to_lowercase().replace(' ', "-")
+}
+
+fn xml_escape(s: &str) -> String {
+    s.replace('\"', "&quot;")
+        .replace('\'', "&apos;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('&', "&amp;")
 }
 
 fn clear() {
