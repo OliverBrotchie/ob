@@ -8,8 +8,8 @@
 
 - Converts blog entries written in Markdown into HTML.   ✍🏻
 - Keeps a rolling blog page.   🔎
+- Keeps an RSS feed which includes blog posts in full.   📰
 - Creates entries in the rolling blog page that are easily modifiable with CSS.   🚀
-- Updates an rss feed which includes blog posts in full.   📰
 - One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously.   💰
 - Works on MacOS, Linux and Windows.   🖥
 - Less than 350 lines of code.   🏖
