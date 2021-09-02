@@ -82,6 +82,7 @@ You will need to create four files:
 ```
 
 - And a configuration file containing the paths to your blog index, template and rss files. 
+
 It should also include the address of where the blog entries will be hosted, the maximum number 
 of posts on the rss feed and whether to include images or not.
 
