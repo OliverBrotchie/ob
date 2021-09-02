@@ -116,15 +116,6 @@ ob --publish
 ob --delete
 ```
 
-**OR**
-
-```shell
-ob -h
-ob -n
-ob -p
-ob -d
-```
-
 The first time `ob` is used it will create a folder at: `/blog`.
 
 When you create a new draft it will be located at: `/blog/drafts`.
