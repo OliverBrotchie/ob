@@ -30,7 +30,7 @@ cargo install ob
 
 You will need to create four files:
 
-A Rolling Blog File where the blog entries will be listed.
+- A Rolling Blog File where the blog entries will be listed.
 
 ```html
 <!DOCTYPE html>
@@ -48,7 +48,7 @@ A Rolling Blog File where the blog entries will be listed.
 </html>
 ```
 
-A Template to be filled out with the content of a blog post.
+- A Template to be filled out with the content of a blog post.
 
 ```html
 <!DOCTYPE html>
@@ -63,7 +63,7 @@ A Template to be filled out with the content of a blog post.
 </html>
 ```
 
-An RSS feed.
+- An RSS feed.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
