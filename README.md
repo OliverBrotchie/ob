@@ -3,7 +3,13 @@ A Blog and RSS system written in Rust.
 
 ## Features
 
-- 
+- Converts blog entries written in Markdown into HTML.
+- Keeps a rolling blog page.
+- Creates entries in the rolling blog page that are easily modifiable with CSS.
+- Updates an rss feed which includes blog posts in full.
+- One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously.
+- Works on Macos, Windows and Linux (unlike `lb`).
+- Blazingly Fast.
 
 ## Installation
 
@@ -21,7 +27,7 @@ cargo install ob
 
 You will need to create four files:
 
-A blog index file where the blog entries will be listed.
+A Rolling Blog File where the blog entries will be listed.
 
 ```html
 <!DOCTYPE html>
@@ -40,7 +46,7 @@ A blog index file where the blog entries will be listed.
 </html>
 ```
 
-A template to be filled out with the content of a blog post.
+A Template to be filled out with the content of a blog post.
 
 ```html
 <!DOCTYPE html>
@@ -76,17 +82,50 @@ An RSS feed.
 ```
 
 A configuration file containing the paths to your blog index, template and rss files.
-It should also include the address of where the blog entries will be hosted and whether to include images or not (true/false).
+It should also include the address of where the blog entries will be hosted, the maximum number 
+of posts on the rss feed and whether to include images or not.
 
 ```json
 {
     "blog": "index.html",
-    "rss": "rss.xml",
     "template": "template.html",
+    "rss": "rss.xml",
+    "items": 4,
     "blog_address": "https://your_blog.com/blog/",
     "images": true
 }
 ```
 
+## Markers
+
+For the system to work, add the following comment line to the Rolling Blog File, the Template and RSS feed (as above).
+
+```html
+<!-- OB -->
+```
+
+When you publish a blog post, it will be added directly below that line in the proper format.
+
 ## Usage
 
+```shell
+ob --help
+ob --new
+ob --publish
+ob --delete
+```
+
+**OR**
+
+```shell
+ob -h
+ob -n
+ob -p
+ob -d
+```
+
+The first time `ob` is used it will create a folder at: `/blog`.
+
+When you create a new draft it will be located at: `/blog/drafts`.
+When you publish a new draft it will be located at: `/blog/example.html`.
+You can delete any blog post with `-d`.
