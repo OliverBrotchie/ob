@@ -12,7 +12,7 @@
 - Creates entries in the rolling blog page that are easily modifiable with CSS.   ⚡️
 - One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously.   🚀
 - Works on MacOS, Linux and Windows.   🖥
-- Less than 350 lines of code, and hense can be customized to your liking.   🛠
+- Less than 350 lines of code.   🏝
 - Blazingly fast.   🔥
 
 ## Installation
