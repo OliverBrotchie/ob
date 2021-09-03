@@ -267,7 +267,7 @@ fn insert_xml(
     match flag {
         "rss" => {
             s = format!(
-                "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[ {s}{html} ]]>\n</description>\n</item>",
+                "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[{s}{html}]]>\n</description>\n</item>",
                 name = xml_escape(&entry.name),
                 kebab = xml_escape(&entry.kebab),
                 address = config.blog_address,
