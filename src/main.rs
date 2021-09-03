@@ -135,22 +135,27 @@ fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
 }
 
 fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Please enter the number of the blog post you wish to delete:");
-    let choice = blog_file
-        .entries
-        .remove(display_choices(&blog_file.entries)?);
-
-    if choice.published {
-        fs::remove_file(format!("blog/{}.html", choice.kebab))?;
-
-        // Remove XML and HTML entries
-        remove_xml(config.rss, &choice)?;
-        remove_xml(config.blog, &choice)?;
+    if blog_file.entries.len() < 1 {
+        println!("No blog entries to delete.")
     } else {
-        fs::remove_file(format!("blog/drafts/{}.md", &choice.name))?;
+        println!("Please enter the number of the blog post you wish to delete:");
+        let choice = blog_file
+            .entries
+            .remove(display_choices(&blog_file.entries)?);
+
+        if choice.published {
+            fs::remove_file(format!("blog/{}.html", choice.kebab))?;
+
+            // Remove XML and HTML entries
+            remove_xml(config.rss, &choice)?;
+            remove_xml(config.blog, &choice)?;
+        } else {
+            fs::remove_file(format!("blog/drafts/{}.md", &choice.name))?;
+        }
+
+        fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
     }
 
-    fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
     Ok(())
 }
 
@@ -172,7 +177,9 @@ fn remove_xml(file: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Er
             {
                 found = true
             }
-            Ok(Event::End(ref e)) if e.name() == b"item" || e.name() == b"li" => found = false,
+            Ok(Event::End(ref e)) if found && (e.name() == b"item" || e.name() == b"li") => {
+                found = false
+            }
             Ok(Event::Eof) => break,
             Ok(e) if !found => w.write_event(e)?,
             Ok(_) => (),
@@ -259,13 +266,13 @@ fn insert_xml(
     match flag {
         "rss" => {
             s = format!(
-                "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[\n{s}\n{html}\n]]>\n</description>\n</item>",
+                "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[ {s}{html} ]]>\n</description>\n</item>",
                 name = xml_escape(&entry.name),
                 kebab = xml_escape(&entry.kebab),
                 address = config.blog_address,
                 rfc = &entry.date,
                 s = &s,
-                html = html,
+                html = html.replace('\n', ""),
             )
         }
         "blog" => {
