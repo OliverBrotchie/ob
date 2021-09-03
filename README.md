@@ -58,7 +58,7 @@ You will need to create four files:
 <html lang="en">
   <head>
     <title></title>
-	<meta charset="utf-8"/>
+    <meta charset="utf-8"/>
   </head>
   <body>
     <!-- OB -->
