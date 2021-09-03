@@ -1,11 +1,10 @@
 use chrono::prelude::*;
-use markdown;
 use quick_xml::{events::Event, Reader, Writer};
 use serde::{Deserialize, Serialize};
 use std::{
     env, fs,
     io::{self, Cursor},
-    path::PathBuf,
+    path::{Path, PathBuf},
     str,
 };
 use structopt::StructOpt;
@@ -63,6 +62,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if args.new {
         new_draft(blog_file)?
+    } else if blog_file.entries.is_empty() {
+        println!("No blog entries exist.")
     } else if args.publish {
         publish_draft(blog_file, config)?
     } else {
@@ -135,7 +136,7 @@ fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
 }
 
 fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    if blog_file.entries.len() < 1 {
+    if blog_file.entries.is_empty() {
         println!("No blog entries to delete.")
     } else {
         println!("Please enter the number of the blog post you wish to delete:");
@@ -195,7 +196,7 @@ fn publish_draft(
     mut blog_file: BlogFile,
     config: Config,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    if blog_file.entries.len() == 0 {
+    if blog_file.entries.is_empty() {
         println!("No blog entries exist.")
     } else {
         // Read in choice
@@ -234,7 +235,7 @@ fn publish_draft(
 }
 
 fn insert_xml(
-    file: &PathBuf,
+    file: &Path,
     config: &Config,
     entry: &Entry,
     html: &str,
@@ -254,7 +255,7 @@ fn insert_xml(
         size = if flag == "blog" { "h3" } else { "h1" },
         date = entry
             .date
-            .split(" ")
+            .split(' ')
             .take(4)
             .fold(String::new(), |acc, e| acc + " " + e)[1..]
             .to_string()
@@ -297,7 +298,7 @@ fn insert_xml(
         match r.read_event(&mut buf) {
             // Remove excess items on the rss feed
             Ok(Event::Start(e)) if flag == "rss" && e.name() == b"item" => {
-                count = count + 1;
+                count += 1;
                 found = true;
                 if count <= config.items {
                     w.write_event(Event::Start(e))?;
@@ -341,7 +342,7 @@ fn insert_xml(
         if flag == "template" {
             PathBuf::from(format!("blog/{}.html", entry.kebab))
         } else {
-            file.clone()
+            file.to_path_buf()
         },
         w.into_inner().into_inner(),
     )?;
