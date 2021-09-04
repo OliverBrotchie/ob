@@ -15,7 +15,7 @@ Cargo.lock
 /target
 .DS_Store
 
-index.html
+blog.html
 template.html
 blog.json
 rss.xml
