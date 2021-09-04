@@ -167,13 +167,9 @@ blockquote
         width: clamp(45ch,70%,200ch)
         margin: 4em 0
 
-    ul
-        @media #{$medium-and-up}
-            width: 70%
-
-        li
-            h3
-                display: inline
+    ul > li > h3
+        display: inline-block
+        margin-right: 40px
 
     section
         @media #{$medium-and-up}
