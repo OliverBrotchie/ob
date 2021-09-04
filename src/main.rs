@@ -256,7 +256,7 @@ fn insert_xml(
 
     // Create template string
     let mut s = format!(
-        "<{size}>{name}</{size}><span>by {author}</span><time datetime='{rfc}'>{date}</time>",
+        "<{size}>{name}</{size}><span>by {author} </span><time datetime='{rfc}'>{date}</time>",
         name = &entry.name,
         author = &entry.author,
         rfc = &entry.date,
