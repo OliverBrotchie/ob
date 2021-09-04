@@ -136,4 +136,4 @@ ob --new
 
 <br>
 
-### See [website](https://oliverbrotchie.github.com/ob/) and `/docs` for an example blog.
+### See [website](https://oliverbrotchie.github.io/ob/) and `/docs` for an example blog.
