@@ -160,9 +160,9 @@ fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::er
     Ok(())
 }
 
-fn remove_xml(file: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Error>> {
-    let path = fs::read_to_string(&file)?;
-    let mut r = Reader::from_str(&path);
+fn remove_xml(path: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Error>> {
+    let file = fs::read_to_string(&path)?;
+    let mut r = Reader::from_str(&file);
     let mut w = Writer::new(Cursor::new(Vec::new()));
     let mut buf = Vec::<u8>::new();
     let mut found = false;
@@ -170,6 +170,15 @@ fn remove_xml(file: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Er
     // Loop over the xml tags
     loop {
         match r.read_event(&mut buf) {
+            Ok(Event::CData(e)) if !found => {
+                w.write(
+                    format!(
+                        "<![CDATA[{}]]>\n",
+                        str::from_utf8(&e.unescaped()?.into_owned())?
+                    )
+                    .as_bytes(),
+                )?;
+            }
             Ok(Event::Start(ref e))
                 if (e.name() == b"item" || e.name() == b"li")
                     && e.attributes().any(|a| {
@@ -188,7 +197,7 @@ fn remove_xml(file: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Er
         }
         buf.clear();
     }
-    fs::write(file, w.into_inner().into_inner())?;
+    fs::write(path, w.into_inner().into_inner())?;
     Ok(())
 }
 
@@ -235,14 +244,14 @@ fn publish_draft(
 }
 
 fn insert_xml(
-    file: &Path,
+    path: &Path,
     config: &Config,
     entry: &Entry,
     html: &str,
     flag: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let path = fs::read_to_string(&file)?;
-    let mut r = Reader::from_str(&path);
+    let file = fs::read_to_string(&path)?;
+    let mut r = Reader::from_str(&file);
     let mut w = Writer::new(Cursor::new(Vec::new()));
     let mut buf = Vec::<u8>::new();
 
@@ -296,6 +305,15 @@ fn insert_xml(
     // Loop over every tag
     loop {
         match r.read_event(&mut buf) {
+            Ok(Event::CData(e)) if found && count <= config.items => {
+                w.write(
+                    format!(
+                        "<![CDATA[{}]]>\n",
+                        str::from_utf8(&e.unescaped()?.into_owned())?
+                    )
+                    .as_bytes(),
+                )?;
+            }
             // Remove excess items on the rss feed
             Ok(Event::Start(e)) if flag == "rss" && e.name() == b"item" => {
                 count += 1;
@@ -326,6 +344,8 @@ fn insert_xml(
                 }
             }
             Ok(Event::Eof) => break,
+
+            // Remove excess items on the rss feed
             Ok(_) if found && count > config.items => (),
             Ok(e) => w.write_event(e)?,
             Err(e) => panic!(
@@ -342,7 +362,7 @@ fn insert_xml(
         if flag == "template" {
             PathBuf::from(format!("blog/{}.html", entry.kebab))
         } else {
-            file.to_path_buf()
+            path.to_path_buf()
         },
         w.into_inner().into_inner(),
     )?;
