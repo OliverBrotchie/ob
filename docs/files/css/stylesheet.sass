@@ -169,23 +169,21 @@ blockquote
 
     section
         @media #{$medium-and-up}
-            margin-left: 50px
+            padding-left: 50px
 
         @media #{$large-and-up}
-            margin-left: 0
+            padding-left: 0
 
+        h1, span, time,
+            display: inline-block
+
+        span, time
+            font-size: 1.2em
         h1
-            display: inline-block
             font-size: 2em
-        span
-            font-size: 1.2em
-            font-weight: 700
-            display: block
+
         time
-            display: inline-block
-            font-size: 1.2em
-            font-weight: 700
-            margin-bottom: 50px
+            margin-bottom: 30px
         li
             @include clamp
             font-size: calc(0.8em + 0.4vw)
