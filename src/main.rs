@@ -117,7 +117,7 @@ fn setup() -> Result<(), io::Error> {
 fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     println!("Please enter the title of the blog post:");
     let name = read_input()?;
-    let k = kebab(&name);
+    let kebab = name.to_lowercase().replace(' ', "-");
 
     println!("Please enter the name of the author:");
     let author = read_input()?;
@@ -127,7 +127,7 @@ fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     blog_file.entries.push(Entry {
         id: random_string::generate(14, "0123456789abcdefghijklmnopqrstuvwxyz"),
         name,
-        kebab: k,
+        kebab,
         author,
         published: false,
         date: String::new(),
@@ -240,7 +240,7 @@ fn publish_draft(
         choices.extend(list);
         blog_file.entries = choices.clone();
         fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
-        fs::remove_file(format!("blog/drafts/{}.md", kebab(&choices[i].name)))?;
+        fs::remove_file(format!("blog/drafts/{}.md", choices[i].kebab))?;
     }
     Ok(())
 }
@@ -397,10 +397,6 @@ fn display_choices(blog_file: &[Entry]) -> Result<usize, Box<dyn std::error::Err
         }
     }
     Ok(input)
-}
-
-fn kebab(s: &str) -> String {
-    s.to_lowercase().replace(' ', "-")
 }
 
 fn xml_escape(s: &str) -> String {
