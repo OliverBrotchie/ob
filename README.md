@@ -133,5 +133,7 @@ When you publish a new draft it will be located at: `/blog/example.html`.
 ```shell
 ob --new
 ```
+
 <br>
+
 **See [website](https://oliverbrotchie.github.com/ob/) and `/docs` for an example blog.**
