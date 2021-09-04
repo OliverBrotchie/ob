@@ -167,6 +167,13 @@ blockquote
         width: clamp(45ch,70%,200ch)
         margin: 4em 0
 
+    ul
+        width: 90%
+
+        li
+            h2
+                display: inline
+
     section
         @media #{$medium-and-up}
             padding-left: 50px
@@ -182,7 +189,8 @@ blockquote
             display: inline-block
 
         time
-            margin-bottom: 30px
+            margin-bottom: 40px
+
         li
             @include clamp
             font-size: calc(0.8em + 0.4vw)
