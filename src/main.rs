@@ -13,7 +13,6 @@ use structopt::StructOpt;
 struct Entry {
     id: String,
     name: String,
-    kebab: String,
     date: String,
     author: String,
     img: Option<String>,
@@ -117,7 +116,6 @@ fn setup() -> Result<(), io::Error> {
 fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     println!("Please enter the title of the blog post:");
     let name = read_input()?;
-    let kebab = name.to_lowercase().replace(' ', "-");
 
     println!("Please enter the name of the author:");
     let author = read_input()?;
@@ -125,9 +123,8 @@ fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     // Create draft
     fs::File::create(format!("blog/drafts/{}.md", name))?;
     blog_file.entries.push(Entry {
-        id: random_string::generate(14, "0123456789abcdefghijklmnopqrstuvwxyz"),
+        id: random_string::generate(14, "0123456789"),
         name,
-        kebab,
         author,
         published: false,
         date: String::new(),
@@ -147,7 +144,7 @@ fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::er
             .remove(display_choices(&blog_file.entries)?);
 
         if choice.published {
-            fs::remove_file(format!("blog/{}.html", choice.kebab))?;
+            fs::remove_file(format!("blog/{}.html", choice.id))?;
 
             // Remove XML and HTML entries
             remove_xml(config.rss, &choice)?;
@@ -240,7 +237,7 @@ fn publish_draft(
         choices.extend(list);
         blog_file.entries = choices.clone();
         fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
-        fs::remove_file(format!("blog/drafts/{}.md", choices[i].kebab))?;
+        fs::remove_file(format!("blog/drafts/{}.md", choices[i].name))?;
     }
     Ok(())
 }
@@ -278,10 +275,9 @@ fn insert_xml(
     match flag {
         "rss" => {
             s = format!(
-                "<item id='{id}'><title>{name}</title><guid>{address}{kebab}</guid><pubDate>{rfc}</pubDate><description><![CDATA[{s}{html}]]></description></item>",
+                "<item id='{id}'><title>{name}</title><guid>{address}{id}</guid><pubDate>{rfc}</pubDate><description><![CDATA[{s}{html}]]></description></item>",
                 id = entry.id,
                 name = xml_escape(&entry.name),
-                kebab = xml_escape(&entry.kebab),
                 address = config.blog_address,
                 rfc = &entry.date,
                 s = &s,
@@ -290,9 +286,8 @@ fn insert_xml(
         }
         "blog" => {
             s = format!(
-                "<li id='{id}'><a href='{address}{kebab}'>{s}</a></li>",
+                "<li id='{id}'><a href='{address}{id}'>{s}</a></li>",
                 id = entry.id,
-                kebab = entry.kebab,
                 address = config.blog_address,
                 s = s,
             )
@@ -363,7 +358,7 @@ fn insert_xml(
 
     fs::write(
         if flag == "template" {
-            PathBuf::from(format!("blog/{}.html", entry.kebab))
+            PathBuf::from(format!("blog/{}.html", entry.id))
         } else {
             path.to_path_buf()
         },
