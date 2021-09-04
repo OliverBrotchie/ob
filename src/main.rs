@@ -11,6 +11,7 @@ use structopt::StructOpt;
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 struct Entry {
+    id: String,
     name: String,
     kebab: String,
     date: String,
@@ -124,6 +125,7 @@ fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     // Create draft
     fs::File::create(format!("blog/drafts/{}.md", name))?;
     blog_file.entries.push(Entry {
+        id: random_string::generate(14, "0123456789abcdefghijklmnopqrstuvwxyz"),
         name,
         kebab: k,
         author,
@@ -182,7 +184,7 @@ fn remove_xml(path: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Er
             Ok(Event::Start(ref e))
                 if (e.name() == b"item" || e.name() == b"li")
                     && e.attributes().any(|a| {
-                        a.unwrap().value.into_owned() == xml_escape(&entry.kebab).into_bytes()
+                        a.unwrap().value.into_owned() == entry.id.clone().into_bytes()
                     }) =>
             {
                 found = true
@@ -276,7 +278,8 @@ fn insert_xml(
     match flag {
         "rss" => {
             s = format!(
-                "<item id='{name}'>\n<title>{name}</title>\n<guid>{address}{kebab}</guid>\n<pubDate>{rfc}</pubDate>\n<description>\n<![CDATA[{s}{html}]]>\n</description>\n</item>",
+                "<item id='{id}'><title>{name}</title><guid>{address}{kebab}</guid><pubDate>{rfc}</pubDate><description><![CDATA[{s}{html}]]></description></item>",
+                id = entry.id,
                 name = xml_escape(&entry.name),
                 kebab = xml_escape(&entry.kebab),
                 address = config.blog_address,
@@ -287,8 +290,8 @@ fn insert_xml(
         }
         "blog" => {
             s = format!(
-                "<li id='{name}'><a href='{address}{kebab}'>{s}</a></li>",
-                name = xml_escape(&entry.name),
+                "<li id='{id}'><a href='{address}{kebab}'>{s}</a></li>",
+                id = entry.id,
                 kebab = entry.kebab,
                 address = config.blog_address,
                 s = s,

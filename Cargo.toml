@@ -16,6 +16,7 @@ serde_json = "1.0.64"
 serde = { version = "1.0.127", features = ["derive"] }
 chrono = "0.4.19"
 markdown = "0.3.0"
+random-string = "1.0.0"
 
 [profile.release]
 lto = true
