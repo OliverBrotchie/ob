@@ -128,8 +128,10 @@ The first time `ob` is used it will create a folder at: `/blog`.
 When you create a new draft it will be located at: `/blog/drafts`.  
 When you publish a new draft it will be located at: `/blog/example.html`.
 
-**Example:**
+**Example usage:**
 
 ```shell
 ob --new
 ```
+
+## See [website](https://oliverbrotchie.github.com/ob) for an example blog.**
