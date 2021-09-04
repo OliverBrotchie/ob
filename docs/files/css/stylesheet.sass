@@ -167,6 +167,11 @@ blockquote
         width: clamp(45ch,70%,200ch)
         margin: 4em 0
 
+    section
+        li
+            @include clamp
+            font-size: calc(0.8em + 0.4vw)
+
 // Segment divider
 .divider
     display: block
