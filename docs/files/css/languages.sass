@@ -1,0 +1,23 @@
+@mixin text-border
+    border-radius: 5px
+    padding: 0 5px
+    margin: 0 1px
+    
+.svelte-text
+    color: #fff !important
+    background-color: #ff3e00 !important
+    @include text-border
+    
+.deno-text
+    color: rgb(22,30,46) !important
+    background-color: rgb(249,250,251) !important
+    border: 1px solid
+    @include text-border
+
+.rust-text
+    color: black !important
+    margin: 0 2px
+    text-decoration: underline dashed
+    text-underline-position: under
+    
+    

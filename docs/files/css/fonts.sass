@@ -1,0 +1,43 @@
+$mono: "mono/Vulf_Mono-"
+$sans: "sans/Vulf_Sans-"
+$url: "../fonts/"
+
+@font-face 
+    font-family: "Vulf Mono"
+    src: url($url + $mono + "Italic_web.woff2") format("woff2")
+    font-weight: 700
+    font-display: swap
+    font-style: italic
+
+@font-face 
+    font-family: "Vulf Sans"
+    src: url($url + $sans + "Light.woff2") format("woff2")
+    font-weight: 400
+    font-style: normal
+    font-display: swap
+
+
+@font-face 
+    font-family: "Vulf Sans"
+    src: url($url + $sans + "Light_Italic.woff2") format("woff2")
+    font-weight: 400
+    font-style: italic
+    font-display: swap
+
+
+@font-face 
+    font-family: "Vulf Sans"
+    src: url($url + $sans + "Bold.woff2") format("woff2")
+    font-weight: 700
+    font-style: normal
+    font-display: swap
+
+
+@mixin sans-light
+    font-family: "Vulf Sans",Courier New
+    font-weight: 400
+
+@mixin mono-italic
+    font-family: "Vulf Mono",Courier New
+    font-weight: 700
+    font-style: italic

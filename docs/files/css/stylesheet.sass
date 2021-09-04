@@ -1,0 +1,233 @@
+/* 
+    My Sass template
+
+    This file contains the core styles/classes.
+    See individual sass files for details on modules.
+
+//----------------------------------------------------------------------------
+
+/* 
+    Modules
+
+    
+@import './fonts.sass'
+@import './grid.sass'
+
+// Remove this for your own projects and add imports here
+@import './languages.sass'
+
+
+//----------------------------------------------------------------------------
+
+/* 
+    Color Palette
+
+    
+$primary-color-old: #5B8499
+$primary-color:#327da3
+$primary-color-light:#3992be
+$primary-color-gradient: linear-gradient($primary-color,$primary-color-light)
+$secondary-color: #222831
+
+
+//----------------------------------------------------------------------------
+
+/* 
+    Mixins
+
+
+@mixin shadow
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2)
+
+@mixin gradient-text
+    background: #{$primary-color-gradient}
+    background-clip: text
+    -webkit-background-clip: text
+    -moz-background-clip: text
+    -moz-text-fill-color: transparent
+    -webkit-text-fill-color: transparent
+
+@mixin clamp
+    max-width: clamp(45ch,50%,75ch)
+    text-align: left
+
+
+//----------------------------------------------------------------------------
+
+/* 
+    Element Styles
+
+nav 
+    @include mono-italic
+    
+    height: 250px
+    width: 100vw
+    background: #{$primary-color-gradient}
+    display: block
+    position: relative
+    margin: 0 0 50px 0
+
+    @media #{$medium-and-up}
+        margin: 0 0 100px 0
+
+    svg
+        position: absolute
+        bottom: 0
+        width: 100%
+        height: 100px
+        
+
+    @media #{$small-and-down}
+        .svg-l
+            display: none
+
+    @media #{$medium-and-up}
+        .svg-s
+            display: none
+
+
+html,body 
+    margin: 0
+    background-color: #fff
+    font-size: 16px
+    overflow-x: hidden
+    max-width: 100vw !important
+    
+
+main
+    @include sans-light
+    margin: 50px 0 100px 0px
+    
+    
+h3 > a
+    color: $primary-color
+
+a
+    text-decoration: none
+
+h1, h2, h3
+    text-align: center
+
+
+footer
+    @include mono-italic
+    
+    background-color: $secondary-color
+    height: 60px
+    width: 100vw
+    color: #fff
+    line-height: 60px
+    margin-top: 100px
+
+    h3
+        margin: 0 !important
+
+    a
+        text-decoration: #fff underline dashed
+        text-underline-position: under
+        color: #fff !important
+
+blockquote
+    margin: 1em 0
+    padding: 0 1em
+    width: clamp(calc(45ch - 2.25em), calc(50% - 2.25em), calc(75ch - 2.25em))
+    color: rgb(82, 89, 97)
+    border-left: .25em solid rgba(106, 115, 125, 0.212)
+    
+    
+//----------------------------------------------------------------------------
+
+/* 
+    Default Classes
+
+
+// Main title
+.title 
+    text-decoration: none
+    text-align: center
+    
+    font-size: 2.0rem
+    line-height: 70px
+    position: absolute
+    width: 100%
+
+    color: #fff
+
+    top: 20%
+
+// Main site content
+.center
+    display: grid
+    place-items: center 
+        
+    @media #{$medium-and-up}
+        border-left: 1px solid #e0e0e0
+        border-right: 1px solid #e0e0e0
+    
+    a
+        color: $primary-color
+    p
+        @include clamp
+        font-size: calc(0.8em + 0.4vw)
+
+    img
+        width: 90vw
+        
+        @media #{$medium-and-up}
+            @include clamp
+    
+    .divider
+        width: clamp(45ch,70%,200ch)
+        margin: 4em 0
+
+
+
+// Segment divider
+.divider
+    display: block
+    height: 1px
+    overflow: hidden
+    background-color: #e0e0e0
+
+// simple button
+.btn,
+    border: none
+    border-radius: 4px
+    display: inline-block
+    height: 36px
+    line-height: 36px
+    padding: 0 16px
+    text-transform: uppercase
+    vertical-align: middle
+    -webkit-tap-highlight-color: transparent
+    outline: 0
+    text-decoration: none
+    text-align: center
+    transition: background-color .2s ease-out
+    cursor: pointer
+    color: #fff !important
+    font-size: 14px
+    font-weight: 700
+
+
+    margin-top: 20px
+
+    @include shadow
+
+    a
+        color: #fff !important
+
+
+.red
+    background-color: #ce392f
+
+.green
+    background-color: #558b2f
+
+.blue-text
+    color: $primary-color !important
+
+
+// Syling github gists
+.gist
+    max-width: 85vw !important
