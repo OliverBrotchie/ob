@@ -1,8 +1,0 @@
-{
-    "blog": "index.html",
-    "template": "template.html",
-    "rss": "rss.xml",
-    "items": 4,
-    "blog_address": "https://oliverbrotchie.github.io/ob/blog/",
-    "images": false
-}
