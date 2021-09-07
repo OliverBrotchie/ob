@@ -103,7 +103,7 @@ fn setup() -> Result<(), io::Error> {
                 _ => println!("Error whilst reading input."),
             }
         }
-        let i: usize = config.rfind("/").unwrap_or(0) + 1;
+        let i: usize = config.rfind('/').unwrap_or(0) + 1;
         let f = BlogFile {
             config_dir: PathBuf::from(&config[..i]),
             config: PathBuf::from(if i == 1 { "" } else { &config[i..] }),
