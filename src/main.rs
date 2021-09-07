@@ -105,8 +105,8 @@ fn setup() -> Result<(), io::Error> {
         }
         let i: usize = config.rfind('/').unwrap_or(0) + 1;
         let f = BlogFile {
-            config_dir: PathBuf::from(&config[..i]),
-            config: PathBuf::from(if i == 1 { "" } else { &config[i..] }),
+            config_dir: PathBuf::from(if i == 1 { "" } else { &config[..i] }),
+            config: PathBuf::from(if i == 1 { &config } else { &config[i..] }),
             entries: Vec::new(),
         };
         fs::create_dir_all("blog/drafts/")?;
