@@ -1,3 +1,3 @@
 # OB Website
 
-This folder will host the website + changelog of OB and can be used as an example of how to use OB! You can find it [here](oliverbrotchie.github.io).
+This folder will host the website + changelog of OB, You can find it live [here](oliverbrotchie.github.io)!
