@@ -1,3 +1,3 @@
 # OB Website
 
-This folder will host the website + changelog of OB, You can find it live [here](oliverbrotchie.github.io)!
+This folder will host OB's changelog and website. You can find it live [here](oliverbrotchie.github.io)!
