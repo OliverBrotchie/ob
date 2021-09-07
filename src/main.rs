@@ -22,6 +22,7 @@ struct Entry {
 #[derive(Serialize, Deserialize)]
 struct BlogFile {
     config: PathBuf,
+    config_dir: PathBuf,
     entries: Vec<Entry>,
 }
 
@@ -57,7 +58,9 @@ struct Args {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     setup()?;
     let blog_file: BlogFile = serde_json::from_str(&fs::read_to_string("blog/.config.json")?)?;
-    let config: Config = serde_json::from_str(&fs::read_to_string(&blog_file.config)?)?;
+    let config: Config = serde_json::from_str(&fs::read_to_string(
+        &blog_file.config_dir.join(&blog_file.config),
+    )?)?;
     let args = Args::from_args();
 
     if args.new {
@@ -81,15 +84,15 @@ fn setup() -> Result<(), io::Error> {
         let x = x.expect("Error");
         x.file_type().unwrap().is_dir() && x.file_name().to_str().unwrap() == "blog"
     }) {
-        let mut config_path: PathBuf;
+        let mut config: String;
         println!("Blog Setup");
         loop {
             println!("Please input the path to your config file:");
             match read_input() {
                 Ok(input) => {
-                    config_path = PathBuf::from(input);
+                    config = input;
                     clear();
-                    match fs::read_to_string(&config_path) {
+                    match fs::read_to_string(&config) {
                         Ok(s) => match serde_json::from_str::<Config>(&s) {
                             Ok(_) => break,
                             _ => println!("Config file was not valid."),
@@ -100,12 +103,12 @@ fn setup() -> Result<(), io::Error> {
                 _ => println!("Error whilst reading input."),
             }
         }
-
+        let i: usize = config.rfind("/").unwrap_or(0) + 1;
         let f = BlogFile {
-            config: config_path,
+            config_dir: PathBuf::from(&config[..i]),
+            config: PathBuf::from(if i == 1 { "" } else { &config[i..] }),
             entries: Vec::new(),
         };
-
         fs::create_dir_all("blog/drafts/")?;
         fs::write("blog/.config.json", serde_json::to_string(&f)?)?;
         clear();
@@ -147,8 +150,8 @@ fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::er
             fs::remove_file(format!("blog/{}.html", choice.id))?;
 
             // Remove XML and HTML entries
-            remove_xml(config.rss, &choice)?;
-            remove_xml(config.blog, &choice)?;
+            remove_xml(blog_file.config_dir.join(config.rss), &choice)?;
+            remove_xml(blog_file.config_dir.join(config.blog), &choice)?;
         } else {
             fs::remove_file(format!("blog/drafts/{}.md", &choice.name))?;
         }
@@ -227,11 +230,28 @@ fn publish_draft(
         choices[i].date = Utc::now().to_rfc2822();
 
         // Create blog entry
-        insert_xml(&config.template, &config, &choices[i], &html, "template")?;
-
+        insert_xml(
+            &blog_file.config_dir.join(&config.template),
+            &config,
+            &choices[i],
+            &html,
+            "template",
+        )?;
         // Edit rolling blog and rss feed
-        insert_xml(&config.rss, &config, &choices[i], &html, "rss")?;
-        insert_xml(&config.blog, &config, &choices[i], &html, "blog")?;
+        insert_xml(
+            &blog_file.config_dir.join(&config.rss),
+            &config,
+            &choices[i],
+            &html,
+            "rss",
+        )?;
+        insert_xml(
+            &blog_file.config_dir.join(&config.blog),
+            &config,
+            &choices[i],
+            &html,
+            "blog",
+        )?;
 
         choices[i].published = true;
         choices.extend(list);
