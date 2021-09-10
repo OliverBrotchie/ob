@@ -11,11 +11,13 @@
         <atom:link href="https://oliverbrotchie.github.io/ob/rss.xml" rel="self" type="application/rss+xml" />
 
         <!-- OB -->
+<item id='47454028380105'><title>v1.0.7</title><guid>https://oliverbrotchie.github.io/ob/blog/47454028380105</guid><pubDate>Fri, 10 Sep 2021 13:35:22 +0000</pubDate><description><![CDATA[<h1>v1.0.7</h1><span>by Oliver Brotchie </span><time datetime='Fri, 10 Sep 2021 13:35:22 +0000'>Fri, 10 Sep 2021</time><p>Updates to documentation and code readability. ✨</p>]]></description></item>
         <item id='45100361942221'>
             <title>v1.0.6</title>
             <guid>https://oliverbrotchie.github.io/ob/blog/45100361942221</guid>
             <pubDate>Tue, 07 Sep 2021 02:10:02 +0000</pubDate>
-            <description><![CDATA[<h1>v1.0.6</h1><span>by Oliver Brotchie </span><time datetime='Tue, 07 Sep 2021 02:10:02 +0000'>Tue, 07 Sep 2021</time><p>Hotfix patching unintensional issue with <a href='https://github.com/OliverBrotchie/ob/pull/10'>this</a> pr.</p>]]></description>
+            <description><![CDATA[<h1>v1.0.6</h1><span>by Oliver Brotchie </span><time datetime='Tue, 07 Sep 2021 02:10:02 +0000'>Tue, 07 Sep 2021</time><p>Hotfix patching unintensional issue with <a href='https://github.com/OliverBrotchie/ob/pull/10'>this</a> pr.</p>]]>
+</description>
         </item>
 
 
@@ -23,7 +25,8 @@
             <title>v1.0.5</title>
             <guid>https://oliverbrotchie.github.io/ob/blog/18937858132263</guid>
             <pubDate>Sat, 04 Sep 2021 19:29:26 +0000</pubDate>
-            <description><![CDATA[<h1>v1.0.5</h1><span>by Oliver Brotchie</span><time datetime='Sat, 04 Sep 2021 19:29:26 +0000'>Sat, 04 Sep 2021</time><p>A collection of various minor fixes and changes:</p><ul><li>Fixed escaping <a href='https://github.com/OliverBrotchie/ob/issues/1'>issue</a> of CDATA in RSS Files.</li><li>Added IDs to rss and rolling blog files to fix name collision <a href='https://github.com/OliverBrotchie/ob/issues/2'>issue</a>.</li><li>Fixed incorrect urls <a href='https://github.com/OliverBrotchie/ob/issues/6'>issue</a>.</li></ul><p>If you have any problems after updating, remove entries in <code>/blog/.config.json</code>.</p>]]></description>
+            <description><![CDATA[<h1>v1.0.5</h1><span>by Oliver Brotchie</span><time datetime='Sat, 04 Sep 2021 19:29:26 +0000'>Sat, 04 Sep 2021</time><p>A collection of various minor fixes and changes:</p><ul><li>Fixed escaping <a href='https://github.com/OliverBrotchie/ob/issues/1'>issue</a> of CDATA in RSS Files.</li><li>Added IDs to rss and rolling blog files to fix name collision <a href='https://github.com/OliverBrotchie/ob/issues/2'>issue</a>.</li><li>Fixed incorrect urls <a href='https://github.com/OliverBrotchie/ob/issues/6'>issue</a>.</li></ul><p>If you have any problems after updating, remove entries in <code>/blog/.config.json</code>.</p>]]>
+</description>
         </item>
 
 
