@@ -9,6 +9,7 @@ use std::{
 };
 use structopt::StructOpt;
 
+/// Json representation of an entry
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 struct Entry {
     id: String,
@@ -19,13 +20,18 @@ struct Entry {
     published: bool,
 }
 
+/// The OB data file
 #[derive(Serialize, Deserialize)]
 struct BlogFile {
-    config: PathBuf,
+    /// The directory containing the config file
     config_dir: PathBuf,
+    /// The name of the config file
+    config: PathBuf,
+    /// The list of entries
     entries: Vec<Entry>,
 }
 
+/// The template of the configuration file
 #[derive(Serialize, Deserialize)]
 struct Config {
     blog: PathBuf,
@@ -47,12 +53,12 @@ struct Args {
     /// Create a new draft.
     #[structopt(short, long)]
     new: bool,
-    /// Delete a draft.
-    #[structopt(short, long)]
-    delete: bool,
-    /// Publish a daft
+    // Publish a daft
     #[structopt(short, long)]
     publish: bool,
+    /// Deletes an entry.
+    #[structopt(short, long)]
+    delete: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -75,6 +81,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+/// Setup the cwd with the required file structure
 fn setup() -> Result<(), io::Error> {
     let cur_path_buf = env::current_dir()?;
     let cur_dir = cur_path_buf.as_path();
@@ -116,6 +123,7 @@ fn setup() -> Result<(), io::Error> {
     Ok(())
 }
 
+/// Create a new draft (will be saved in '/blog/drafts')
 fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     println!("Please enter the title of the blog post:");
     let name = read_input()?;
@@ -137,6 +145,7 @@ fn new_draft(mut blog_file: BlogFile) -> Result<(), io::Error> {
     Ok(())
 }
 
+/// Delete a blog entry or draft
 fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::error::Error>> {
     if blog_file.entries.is_empty() {
         println!("No blog entries to delete.")
@@ -162,6 +171,7 @@ fn delete(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::er
     Ok(())
 }
 
+/// Edit given XML or HTML files and remove certain tags
 fn remove_xml(path: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Error>> {
     let file = fs::read_to_string(&path)?;
     let mut r = Reader::from_str(&file);
@@ -203,6 +213,7 @@ fn remove_xml(path: PathBuf, entry: &Entry) -> Result<(), Box<dyn std::error::Er
     Ok(())
 }
 
+/// Publish a draft and convert it from Markdown to HTML
 fn publish_draft(
     mut blog_file: BlogFile,
     config: Config,
@@ -262,6 +273,7 @@ fn publish_draft(
     Ok(())
 }
 
+/// Insert XML or HTML into a given file
 fn insert_xml(
     path: &Path,
     config: &Config,
@@ -387,12 +399,14 @@ fn insert_xml(
     Ok(())
 }
 
+/// Get user input
 fn read_input() -> Result<String, io::Error> {
     let mut buf = String::new();
     io::stdin().read_line(&mut buf)?;
     Ok(buf.replace("\n", ""))
 }
 
+/// Display a set of entries and get user to choose one
 fn display_choices(blog_file: &[Entry]) -> Result<usize, Box<dyn std::error::Error>> {
     let input: usize;
     for (i, e) in blog_file.iter().enumerate() {
@@ -414,6 +428,7 @@ fn display_choices(blog_file: &[Entry]) -> Result<usize, Box<dyn std::error::Err
     Ok(input)
 }
 
+/// Fully escape any XML string
 fn xml_escape(s: &str) -> String {
     s.replace('\"', "&quot;")
         .replace('\'', "&apos;")
@@ -422,6 +437,7 @@ fn xml_escape(s: &str) -> String {
         .replace('&', "&amp;")
 }
 
+/// Clear the terminal
 fn clear() {
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 }

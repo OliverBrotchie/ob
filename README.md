@@ -116,7 +116,7 @@ USAGE:
     ob [FLAGS]
 
 FLAGS:
-    -d, --delete     Delete a draft
+    -d, --delete     Delete an entry
     -h, --help       Prints help information
     -n, --new        Create a new draft
     -p, --publish    Publish a daft
