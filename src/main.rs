@@ -61,6 +61,13 @@ struct Args {
     delete: bool,
 }
 
+#[derive(PartialEq, Debug)]
+enum Flag {
+    Rss,
+    Blog,
+    Template,
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     setup()?;
     let blog_file: BlogFile = serde_json::from_str(&fs::read_to_string("blog/.config.json")?)?;
@@ -246,7 +253,7 @@ fn publish_draft(
             &config,
             &choices[i],
             &html,
-            "template",
+            Flag::Template,
         )?;
         // Edit rolling blog and rss feed
         insert_xml(
@@ -254,14 +261,14 @@ fn publish_draft(
             &config,
             &choices[i],
             &html,
-            "rss",
+            Flag::Rss,
         )?;
         insert_xml(
             &blog_file.config_dir.join(&config.blog),
             &config,
             &choices[i],
             &html,
-            "blog",
+            Flag::Blog,
         )?;
 
         choices[i].published = true;
@@ -279,7 +286,7 @@ fn insert_xml(
     config: &Config,
     entry: &Entry,
     html: &str,
-    flag: &str,
+    flag: Flag,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let file = fs::read_to_string(&path)?;
     let mut r = Reader::from_str(&file);
@@ -292,7 +299,7 @@ fn insert_xml(
         name = &entry.name,
         author = &entry.author,
         rfc = &entry.date,
-        size = if flag == "blog" { "h3" } else { "h1" },
+        size = if flag == Flag::Blog { "h3" } else { "h1" },
         date = entry
             .date
             .split(' ')
@@ -305,7 +312,7 @@ fn insert_xml(
         s = format!("<img src='{}'/><label>{}</label>", xml_escape(img), s);
     }
     match flag {
-        "rss" => {
+        Flag::Rss => {
             s = format!(
                 "<item id='{id}'><title>{name}</title><guid>{address}{id}</guid><pubDate>{rfc}</pubDate><description><![CDATA[{s}{html}]]></description></item>",
                 id = entry.id,
@@ -316,7 +323,7 @@ fn insert_xml(
                 html = html.replace('\n', ""),
             )
         }
-        "blog" => {
+        Flag::Blog => {
             s = format!(
                 "<li id='{id}'><a href='{address}{id}'>{s}</a></li>",
                 id = entry.id,
@@ -324,8 +331,7 @@ fn insert_xml(
                 s = s,
             )
         }
-        "template" => s = s + "\n" + html,
-        _ => (),
+        Flag::Template => s = s + "\n" + html,
     }
 
     // Rss count variables
@@ -345,14 +351,14 @@ fn insert_xml(
                 )?;
             }
             // Remove excess items on the rss feed
-            Ok(Event::Start(e)) if flag == "rss" && e.name() == b"item" => {
+            Ok(Event::Start(e)) if flag == Flag::Rss && e.name() == b"item" => {
                 count += 1;
                 found = true;
                 if count <= config.items {
                     w.write_event(Event::Start(e))?;
                 }
             }
-            Ok(Event::End(e)) if flag == "rss" && e.name() == b"item" => {
+            Ok(Event::End(e)) if flag == Flag::Rss && e.name() == b"item" => {
                 found = false;
                 if count <= config.items {
                     w.write_event(Event::End(e))?;
@@ -360,7 +366,7 @@ fn insert_xml(
             }
 
             // Add titles to the template
-            Ok(Event::Start(e)) if flag == "template" && e.name() == b"title" => {
+            Ok(Event::Start(e)) if flag == Flag::Template && e.name() == b"title" => {
                 w.write(format!("<title>{}</title>", entry.name).as_bytes())?
             }
 
@@ -379,7 +385,7 @@ fn insert_xml(
             Ok(_) if found && count > config.items => (),
             Ok(e) => w.write_event(e)?,
             Err(e) => panic!(
-                "Error when reading {} {}: {:?}",
+                "Error when reading {:#?} {}: {:#?}",
                 flag,
                 r.buffer_position(),
                 e
@@ -389,7 +395,7 @@ fn insert_xml(
     }
 
     fs::write(
-        if flag == "template" {
+        if flag == Flag::Template {
             PathBuf::from(format!("blog/{}.html", entry.id))
         } else {
             path.to_path_buf()
