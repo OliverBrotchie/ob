@@ -1,10 +1,10 @@
 [package]
 name = "ob"
-version = "1.0.8"
+version = "1.0.9"
 edition = "2018"
 description = "A Blog and RSS system written in Rust."
 license = "GPL-3.0"
-repository = "https://github.com/OliverBrotchie/conveyance-cli"
+repository = "https://github.com/OliverBrotchie/ob"
 keywords = ["rss", "blog"]
 categories = ["command-line-utilities","text-processing"]
 authors = ["Oliver Brotchie <o.brotchie@gmail.com>"]
