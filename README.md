@@ -101,7 +101,7 @@ of posts on the rss feed and whether to include images or not.
 
 ## Markers
 
-For the system to work, add the following comment line to the Rolling Blog File, the Template and RSS feed (as above).
+For the system to work, add the following comment line to the Rolling Blog File, Template and RSS feed (as above).
 
 ```html
 <!-- OB -->
