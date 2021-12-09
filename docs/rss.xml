@@ -7,33 +7,47 @@
         <title>OB</title>
         <description>OB Changelog</description>
         <language>en-us</language>
-        <link>https://oliverbrotchie.github.io/ob/rss.xml</link>
-        <atom:link href="https://oliverbrotchie.github.io/ob/rss.xml" rel="self" type="application/rss+xml" />
+        <link>https://unazoomer.net/ob/rss.xml</link>
+        <atom:link href="https://unazoomer.net/ob/rss.xml" rel="self" type="application/rss+xml" />
 
         <!-- OB -->
-<item id='08481955680708'><title>v1.0.9</title><guid>https://oliverbrotchie.github.io/ob/blog/08481955680708</guid><pubDate>Wed, 15 Sep 2021 17:53:53 +0000</pubDate><description><![CDATA[<h1>v1.0.9</h1><span>by Oliver Brotchie </span><time datetime='Wed, 15 Sep 2021 17:53:53 +0000'>Wed, 15 Sep 2021</time><p>Fixed incorrect link in <code>cargo.toml</code>.</p>]]></description></item>
-<item id='66525609837342'><title>v1.0.8</title><guid>https://oliverbrotchie.github.io/ob/blog/66525609837342</guid><pubDate>Tue, 14 Sep 2021 18:16:57 +0000</pubDate><description><![CDATA[<h1>v1.0.8</h1><span>by Oliver Brotchie </span><time datetime='Tue, 14 Sep 2021 18:16:57 +0000'>Tue, 14 Sep 2021</time><p>Replaced strings with enums for pattern matching to increase performance.</p>]]>
-</description></item>
+        <item id='96240686302273'>
+            <title>v1.0.10</title>
+            <guid>https://unazoomer.net/ob/blog/96240686302273</guid>
+            <pubDate>Thu, 09 Dec 2021 20:11:03 +0000</pubDate>
+            <description><![CDATA[<h1>v1.0.10</h1><span>by Oliver Brotchie </span><time datetime='Thu, 09 Dec 2021 20:11:03 +0000'>Thu, 09 Dec 2021</time><p>New functionality added:</p><ul><li>Static regeneration using the <code>regen</code> command. This is useful if you want to update the structure/look of the template file and apply it to every entry.</li><li>Ability to edit spesific entries using the <code>edit</code> command.</li></ul>]]></description>
+        </item>
+        <item id='08481955680708'>
+            <title>v1.0.9</title>
+            <guid>https://unazoomer.net/ob/blog/08481955680708</guid>
+            <pubDate>Wed, 15 Sep 2021 17:53:53 +0000</pubDate>
+            <description><![CDATA[<h1>v1.0.9</h1><span>by Oliver Brotchie </span><time datetime='Wed, 15 Sep 2021 17:53:53 +0000'>Wed, 15 Sep 2021</time><p>Fixed incorrect link in <code>cargo.toml</code>.</p>]]>
+            </description>
+        </item>
+        <item id='66525609837342'>
+            <title>v1.0.8</title>
+            <guid>https://unazoomer.net/ob/blog/66525609837342</guid>
+            <pubDate>Tue, 14 Sep 2021 18:16:57 +0000</pubDate>
+            <description><![CDATA[<h1>v1.0.8</h1><span>by Oliver Brotchie </span><time datetime='Tue, 14 Sep 2021 18:16:57 +0000'>Tue, 14 Sep 2021</time><p>Replaced strings with enums for pattern matching to increase performance.</p>]]>
 
-<item id='47454028380105'><title>v1.0.7</title><guid>https://oliverbrotchie.github.io/ob/blog/47454028380105</guid><pubDate>Fri, 10 Sep 2021 13:35:22 +0000</pubDate><description><![CDATA[<h1>v1.0.7</h1><span>by Oliver Brotchie </span><time datetime='Fri, 10 Sep 2021 13:35:22 +0000'>Fri, 10 Sep 2021</time><p>Updates to documentation and code readability. ✨</p>]]>
+            </description>
+        </item>
 
-
-
-</description></item>
-        <item id='45100361942221'>
-            <title>v1.0.6</title>
-            <guid>https://oliverbrotchie.github.io/ob/blog/45100361942221</guid>
-            <pubDate>Tue, 07 Sep 2021 02:10:02 +0000</pubDate>
-            <description><![CDATA[<h1>v1.0.6</h1><span>by Oliver Brotchie </span><time datetime='Tue, 07 Sep 2021 02:10:02 +0000'>Tue, 07 Sep 2021</time><p>Hotfix patching unintensional issue with <a href='https://github.com/OliverBrotchie/ob/pull/10'>this</a> pr.</p>]]>
+        <item id='47454028380105'>
+            <title>v1.0.7</title>
+            <guid>https://unazoomer.net/ob/blog/47454028380105</guid>
+            <pubDate>Fri, 10 Sep 2021 13:35:22 +0000</pubDate>
+            <description><![CDATA[<h1>v1.0.7</h1><span>by Oliver Brotchie </span><time datetime='Fri, 10 Sep 2021 13:35:22 +0000'>Fri, 10 Sep 2021</time><p>Updates to documentation and code readability. ✨</p>]]>
 
 
 
 
-</description>
+            </description>
         </item>
 
 
-        
+
+
 
 
     </channel>

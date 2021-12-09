@@ -67,6 +67,7 @@ enum Flag {
     Rss,
     Blog,
     Template,
+    Regen,
 }
 
 struct State<'a> {
@@ -262,11 +263,17 @@ fn publish_draft(
         blog_file.entries.into_iter().partition(|e| e.published);
     let i = display_choices(&choices)?;
 
-    // Convert markdown file to html
-    let html = markdown::to_html(&fs::read_to_string(format!(
-        "blog/drafts/{}.md",
-        choices[i].name
-    ))?);
+    let mut already_exists = false;
+
+    let html = match fs::read_to_string(format!("blog/drafts/{}.md", &choices[i].name)) {
+        // Convert markdown file to html
+        Ok(s) => markdown::to_html(&s),
+        // Draft is already html
+        Err(_) => {
+            already_exists = true;
+            fs::read_to_string(format!("blog/drafts/{}.html", &choices[i].name))?
+        }
+    };
 
     // Ask for images
     if config.images {
@@ -291,20 +298,25 @@ fn publish_draft(
         &html,
         Flag::Rss,
     )?;
-    insert_xml(
-        &blog_file.config_dir.join(&config.blog),
-        &config,
-        &choices[i],
-        &html,
-        Flag::Blog,
-    )?;
+    if !already_exists {
+        insert_xml(
+            &blog_file.config_dir.join(&config.blog),
+            &config,
+            &choices[i],
+            &html,
+            Flag::Blog,
+        )?
+    };
 
     choices[i].published = true;
     choices.extend(list);
     blog_file.entries = choices.clone();
     fs::write("blog/.config.json", serde_json::to_string(&blog_file)?)?;
-    fs::remove_file(format!("blog/drafts/{}.md", choices[i].name))?;
-
+    if already_exists {
+        fs::remove_file(format!("blog/drafts/{}.html", choices[i].name))?;
+    } else {
+        fs::remove_file(format!("blog/drafts/{}.md", choices[i].name))?;
+    }
     Ok(())
 }
 
@@ -319,46 +331,51 @@ fn insert_xml(
     let f = fs::read_to_string(&path)?;
     let (mut s, mut w) = state!(&f);
 
-    // Create template string
-    let mut insert = format!(
-        "<{size}>{name}</{size}><span>by {author} </span><time datetime='{rfc}'>{date}</time>",
-        name = &entry.name,
-        author = &entry.author,
-        rfc = &entry.date,
-        size = if flag == Flag::Blog { "h3" } else { "h1" },
-        date = entry
-            .date
-            .split(' ')
-            .take(4)
-            .fold(String::new(), |acc, e| acc + " " + e)[1..]
-            .to_string()
-    );
-
-    if let Some(img) = &entry.img {
-        insert = format!("<img src='{}'/><label>{}</label>", xml_escape(img), insert);
-    }
-    match flag {
-        Flag::Rss => {
-            insert = format!(
-                "<item id='{id}'><title>{name}</title><guid>{address}{id}</guid><pubDate>{rfc}</pubDate><description><![CDATA[{template}{html}]]></description></item>",
-                id = entry.id,
-                name = xml_escape(&entry.name),
-                address = config.blog_address,
-                rfc = &entry.date,
-                template = &insert,
-                html = html.replace('\n', ""),
-            )
+    let insert = if flag == Flag::Regen {
+        html.to_owned()
+    } else {
+        // Create template string
+        let mut insert = format!(
+            "<{size}>{name}</{size}><span>by {author} </span><time datetime='{rfc}'>{date}</time>",
+            name = &entry.name,
+            author = &entry.author,
+            rfc = &entry.date,
+            size = if flag == Flag::Blog { "h3" } else { "h1" },
+            date = entry
+                .date
+                .split(' ')
+                .take(4)
+                .fold(String::new(), |acc, e| acc + " " + e)[1..]
+                .to_string()
+        );
+        if let Some(img) = &entry.img {
+            insert = format!("<img src='{}'/><label>{}</label>", xml_escape(img), insert);
         }
-        Flag::Blog => {
-            insert = format!(
-                "<li id='{id}'><a href='{address}{id}'>{insert}</a></li>",
-                id = entry.id,
-                address = config.blog_address,
-                insert = insert,
-            )
+        match flag {
+            Flag::Rss => {
+                insert = format!(
+                    "<item id='{id}'><title>{name}</title><guid>{address}{id}</guid><pubDate>{rfc}</pubDate><description><![CDATA[{template}{html}]]></description></item>",
+                    id = entry.id,
+                    name = xml_escape(&entry.name),
+                    address = config.blog_address,
+                    rfc = &entry.date,
+                    template = &insert,
+                    html = html.replace('\n', ""),
+                )
+            }
+            Flag::Blog => {
+                insert = format!(
+                    "<li id='{id}'><a href='{address}{id}'>{insert}</a></li>",
+                    id = entry.id,
+                    address = config.blog_address,
+                    insert = insert,
+                )
+            }
+            Flag::Template => insert = insert + "\n" + html,
+            _ => {},
         }
-        Flag::Template => insert = insert + "\n" + html,
-    }
+        insert
+    };
 
     // Rss count variables
     let mut found = false;
@@ -413,7 +430,7 @@ fn insert_xml(
     }
 
     fs::write(
-        if flag == Flag::Template {
+        if flag == Flag::Template || flag == Flag::Regen {
             PathBuf::from(format!("blog/{}.html", entry.id))
         } else {
             path.to_path_buf()
@@ -426,20 +443,28 @@ fn insert_xml(
 fn get_inner(path: PathBuf) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let f = fs::read_to_string(&path)?;
     let (mut s, mut w) = state!(&f);
-
+    let mut skip = true;
     let mut cur: usize = 0;
     let mut inner_level: usize = usize::MAX;
 
     // Loop over every tag
     while let Some(e) = s.next() {
-        match e {
+        match &e {
             Event::Comment(e) if &*e.unescaped()? == b" OB " => inner_level = cur,
-            e if cur >= inner_level => {
-                w.write_event(e)?;
-            }
             Event::Start(_) => cur += 1,
             Event::End(_) => cur -= 1,
             _ => {}
+        }
+        if cur >= inner_level {
+            if skip {
+                // Skip generated title etc
+                for _ in 1..14 {
+                    s.next();
+                }
+                skip = false;
+            } else {
+                w.write_event(e)?;
+            }
         }
     }
 
@@ -454,7 +479,7 @@ fn edit(mut blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::erro
 
     let path = format!("blog/{}.html", choices[i].id);
     fs::write(
-        &format!("blog/drafts/{}.md", choices[i].name),
+        &format!("blog/drafts/{}.html", choices[i].name),
         get_inner(PathBuf::from(format!("blog/{}.html", choices[i].id)))?,
     )?;
     fs::remove_file(path)?;
@@ -487,7 +512,6 @@ fn regen(blog_file: BlogFile, config: Config) -> Result<(), Box<dyn std::error::
             Flag::Template,
         )?;
     }
-
     Ok(())
 }
 
