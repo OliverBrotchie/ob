@@ -10,9 +10,9 @@
 - Keeps a rolling blog page.   🔎
 - Keeps an RSS feed which includes blog posts in full.   📰
 - Creates entries in the rolling blog page that are easily modifiable with CSS.   ⚡️
-- One command to delete entries from the RSS feed, rolling blog and standalone entries simultaneously.   🚀
+- One command to delete, edit or regenerate entries from the RSS feed, rolling blog and standalone entry pages simultaneously.   🚀
 - Works on MacOS, Linux and Windows.   🖥
-- Less than 350 lines of code.   🏝
+- Less than 450 lines of code.   🏝
 - Blazingly fast.   🔥
 
 ## Installation
@@ -113,14 +113,19 @@ When you publish a blog post, it will be added directly below that line in the p
 
 ```
 USAGE:
-    ob [FLAGS]
+    ob <SUBCOMMAND>
 
 FLAGS:
-    -d, --delete     Delete an entry
     -h, --help       Prints help information
-    -n, --new        Create a new draft
-    -p, --publish    Publish a daft
     -V, --version    Prints version information
+
+SUBCOMMANDS:
+    delete     Deletes an entry
+    edit       Edit a published entry
+    help       Prints this message or the help of the given subcommand(s)
+    new        Create a new draft
+    publish    Publish a daft
+    regen      Regenerates all blog entries
 ```
 
 The first time `ob` is used it will create a folder at: `/blog`.
@@ -131,7 +136,7 @@ When you publish a new draft it will be located at: `/blog/example.html`.
 **Example usage:**
 
 ```shell
-ob --new
+ob new
 ```
 
 <br>
