@@ -298,6 +298,8 @@ fn publish_draft(
         &html,
         Flag::Rss,
     )?;
+
+    // Test if editing
     if !already_exists {
         insert_xml(
             &blog_file.config_dir.join(&config.blog),

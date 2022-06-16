@@ -1,8 +1,10 @@
-<br/>
-<img src="https://image.flaticon.com/icons/png/512/4229/4229823.png" height="200" width="200"/>
+<div align="center">
 
-# OB - Oliver's Blog Script
-**A Blog and RSS system written in Rust.**
+  <h1><code>ob</code></h1>
+
+  <strong>Oliver's Blog Script - A Blog and RSS system written in Rust.</strong>
+
+</div>
 
 ## Features
 
